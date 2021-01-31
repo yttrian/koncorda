@@ -108,7 +108,7 @@ fabric.properties
 ### Gradle template
 .gradle
 **/build/
-!src/**/build/
+!koncorda/src/**/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
