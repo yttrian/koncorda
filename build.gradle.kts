@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.yttr"
-version = "0.0.1"
+version = "0.1.0"
 
 plugins {
     id("tanvd.kosogor") version "1.0.10" apply true
@@ -14,7 +14,6 @@ subprojects {
         plugin("kotlin")
         plugin("tanvd.kosogor")
         plugin("io.gitlab.arturbosch.detekt")
-        plugin("maven-publish")
     }
 
     repositories {

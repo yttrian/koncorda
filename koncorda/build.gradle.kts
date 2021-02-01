@@ -12,18 +12,15 @@ dependencies {
 }
 
 publishJar {
-    enablePublication = true
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/yttrian/koncorda")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
+    bintray {
+        username = "yttrian"
+        repository = "koncorda"
+        info {
+            description = "Easy to use DSL wrapping JDA"
+            githubRepo = "https://github.com/yttrian/koncorda"
+            vcsUrl = githubRepo
+            license = "MIT"
+            labels.addAll(listOf("kotlin", "kotlin-dsl", "discord", "jda"))
         }
     }
 }
