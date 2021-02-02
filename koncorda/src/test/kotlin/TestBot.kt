@@ -1,11 +1,14 @@
 import command.HelpCommand
 import command.TestCommand
+import net.dv8tion.jda.api.requests.GatewayIntent
 import org.yttr.koncorda.command.check.Impossible
 import org.yttr.koncorda.commands
 import org.yttr.koncorda.koncorda
 
 fun main() {
-    koncorda(TestBotConfig) {
+    koncorda {
+        gatewayIntents = listOf(GatewayIntent.GUILD_MESSAGES)
+
         commands {
             leaf("help", HelpCommand)
             branch("test") {
