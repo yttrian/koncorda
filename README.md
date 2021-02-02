@@ -38,13 +38,13 @@ Using Koncorda is easy, especially with the `koncorda` entrypoint.
 fun main() {
     koncorda {
         commmands {
-            tail("hello") { event.respond("Hello world!") }
+            leaf("hello") { event.respond("Hello world!") }
         }
     }.start()
 }
 ```
 
-DSLs like `command` make adding new functionality as easy as possible. 
+DSLs like `commands` make adding new functionality as easy as possible. 
 The above example creates a bot that responds "Hello world!" to `!hello`.
 
 Extending the configuration is possible by creating an `application.conf` HOCON file. By default, Koncorda uses what
@@ -52,15 +52,11 @@ is defined in [reference.conf](koncorda/src/main/resources/reference.conf), but 
 
 ```hocon
 koncorda {
-  // The Discord bot token, comes from the environmental variable DISCORD_TOKEN
-  discord-token = ${DISCORD_TOKEN}
-  // The command prefix, defaults to ! or the environmental variable COMMAND_PREFIX
-  command-prefix = "!"
-  command-prefix = ${?COMMAND_PREFIX}
+  command-prefix = "/"
 }
 
 your-bot {
-    some-option = "some value"
+  some-option = "some value"
 }
 ```
 
