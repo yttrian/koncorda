@@ -7,7 +7,7 @@ dependencies {
     implementation("net.dv8tion:JDA:4.2.0_227") {
         exclude(module = "opus-java")
     }
-    api("tanvd.konfy:konfy:0.1.18")
+    api("com.typesafe:config:1.4.1")
     testImplementation("ch.qos.logback:logback-classic:1.2.3")
 }
 
