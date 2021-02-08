@@ -24,7 +24,7 @@ sealed class Command(
         private val fallback by lazy {
             if (handler != null) Leaf(depth, handler) else {
                 val autoHelpCommandHandler = object : CommandHandler {
-                    override fun CommandCall.handle() {
+                    override suspend fun CommandCall.handle() {
                         val path = args.joinToString(" ")
                         val validSubcommands = routes.keys.joinToString { "`$it`" }
                         event.respond("Valid subcommands for `$path` are $validSubcommands.")
@@ -62,8 +62,11 @@ sealed class Command(
         private val handler: CommandHandler,
         private val help: Boolean = false
     ) : Command(depth) {
-        operator fun invoke(event: MessageReceivedEvent, args: List<String>) = with(handler) {
-            CommandCall(event, if (help) args.take(depth) else args.drop(depth)).handle()
+        fun createCall(event: MessageReceivedEvent, args: List<String>) =
+            CommandCall(event, if (help) args.take(depth) else args.drop(depth))
+
+        suspend fun handle(call: CommandCall) = with(handler) {
+            call.handle()
         }
 
         override fun addCheck(addedCheck: CommandCheck) {
@@ -91,9 +94,9 @@ sealed class Command(
      * Set the handler.
      */
     @CreationDsl
-    fun Branch.leaf(arg: String, handler: CommandCall.() -> Unit) {
+    fun Branch.leaf(arg: String, handler: suspend CommandCall.() -> Unit) {
         routes["$prefix$arg"] = Leaf(nextDepth, object : CommandHandler {
-            override fun CommandCall.handle() = handler()
+            override suspend fun CommandCall.handle() = handler()
         })
     }
 
@@ -108,5 +111,5 @@ sealed class Command(
 
     abstract fun addCheck(addedCheck: CommandCheck)
 
-    fun check(event: MessageReceivedEvent) = checks.all { it.check(event) }
+    suspend fun check(call: CommandCall) = checks.all { it.check(call) }
 }

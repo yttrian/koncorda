@@ -1,7 +1,7 @@
 package org.yttr.koncorda.command.check
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import org.yttr.koncorda.command.CommandCall
 
 interface CommandCheck {
-    fun check(event: MessageReceivedEvent): Boolean
+    suspend fun check(call: CommandCall): Boolean
 }

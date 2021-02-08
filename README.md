@@ -26,7 +26,7 @@ dependencies {
     implementation("net.dv8tion:JDA:4.2.0_227") {
         exclude(module = "opus-java") // optional, for if you don't plan to use voice chat
     }
-    implementation("org.yttr:koncorda:0.1.2")
+    implementation("org.yttr:koncorda:0.2.0")
 }
 ```
 
