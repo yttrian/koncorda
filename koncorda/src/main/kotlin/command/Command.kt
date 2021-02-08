@@ -104,7 +104,7 @@ sealed class Command(
      * Create a checked branch.
      */
     fun Branch.check(check: CommandCheck, build: Branch.() -> Unit) {
-        val checkedBranch = Branch().also(build)
+        val checkedBranch = Branch(prefix = prefix).also(build)
         checkedBranch.addCheck(check)
         this.routes += checkedBranch.routes
     }
