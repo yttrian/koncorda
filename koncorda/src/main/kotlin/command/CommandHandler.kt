@@ -7,5 +7,5 @@ interface CommandHandler {
     /**
      * Handle the message event for a command invocation.
      */
-    fun CommandCall.handle()
+    suspend fun CommandCall.handle()
 }

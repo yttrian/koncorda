@@ -2,6 +2,10 @@ package org.yttr.koncorda
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -14,6 +18,9 @@ import org.yttr.koncorda.command.Command
 class Koncorda : ListenerAdapter() {
     private val discordToken = conf.getString("koncorda.discord-token")
     private val baseCommands = mutableListOf<Command.Branch>()
+
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.Default + job)
 
     /**
      * Explicitly listed gateways intents, defaults to JDA defaults
@@ -36,17 +43,20 @@ class Koncorda : ListenerAdapter() {
         // ignore improper messages
         if (event.isIgnorable) return
 
-        // split the args
-        val args = event.message.contentStripped.trim().split(" ")
+        scope.launch {
+            // split the args
+            val args = event.message.contentStripped.trim().split(" ")
 
-        // find the command handler, if it exists
-        when (val baseCommand = allBaseCommands()[args.first()]) {
-            is Command.Leaf -> baseCommand
-            is Command.Branch -> baseCommand[args.drop(1)]
-            else -> null
-        }?.let {
-            if (it.check(event)) it(event, args) else {
-                event.channel.sendMessage("You are not allowed to use that command.").queue()
+            // find the command handler, if it exists
+            when (val baseCommand = allBaseCommands()[args.first()]) {
+                is Command.Leaf -> baseCommand
+                is Command.Branch -> baseCommand[args.drop(1)]
+                else -> null
+            }?.let {
+                val call = it.createCall(event, args)
+                if (it.check(call)) it.handle(call) else {
+                    event.channel.sendMessage("You are not allowed to use that command.").queue()
+                }
             }
         }
     }
