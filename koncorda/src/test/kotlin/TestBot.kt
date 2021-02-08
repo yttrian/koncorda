@@ -1,5 +1,6 @@
 import command.HelpCommand
 import command.TestCommand
+import command.check.Useless
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.yttr.koncorda.command.check.Impossible
 import org.yttr.koncorda.commands
@@ -12,7 +13,7 @@ fun main() {
         commands {
             leaf("help", HelpCommand)
             branch("test") {
-                check(command.check.Useless) {
+                check(Useless) {
                     branch("a") {
                         check(Impossible) {
                             leaf("b", TestCommand("You reached b!"))
@@ -25,6 +26,9 @@ fun main() {
             }
             leaf("hello") {
                 event.respond("Hello ${event.author}!")
+            }
+            check(Useless) {
+                leaf("world") { event.respond("Yay!") }
             }
         }
     }.start(lowMemory = true)
