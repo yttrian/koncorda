@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.yttr"
-version = "0.2.1"
+version = "0.2.2"
 
 plugins {
     id("tanvd.kosogor") version "1.0.10" apply true
