@@ -7,20 +7,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.events.Event
+import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.requests.GatewayIntent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.yttr.koncorda.command.Command
 
 /**
  * The Discord bot application, with useful DSLs for setting up different features.
  */
-class Koncorda : ListenerAdapter() {
+class Koncorda {
+    val logger: Logger = LoggerFactory.getLogger(this::class.simpleName)
     private val discordToken = conf.getString("koncorda.discord-token")
-    private val baseCommands = mutableListOf<Command.Branch>()
+    internal val baseCommands = mutableListOf<Command.Branch>()
+    internal val eventListeners = mutableListOf<EventListener>()
 
     private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.Default + job)
+    internal val scope = CoroutineScope(Dispatchers.Default + job)
 
     /**
      * Explicitly listed gateways intents, defaults to JDA defaults
@@ -35,15 +41,22 @@ class Koncorda : ListenerAdapter() {
         JDABuilder.createLight(discordToken)
     } else {
         JDABuilder.createDefault(discordToken)
-    }.addEventListeners(this).setEnabledIntents(gatewayIntents).build()
+    }.apply {
+        eventListeners.forEach { addEventListeners(it) }
+        setEnabledIntents(gatewayIntents)
+    }.build()
 
-    internal fun addBaseCommand(command: Command.Branch) = baseCommands.add(command)
+    internal inline fun <reified E : Event> addEventListener(crossinline action: suspend (E) -> Unit) {
+        val listener = EventListener {
+            if (it is E && !(it is MessageReceivedEvent && it.isIgnorable)) {
+                scope.launch { action(it) }
+            }
+        }
+        eventListeners.add(listener)
+    }
 
-    override fun onMessageReceived(event: MessageReceivedEvent) {
-        // ignore improper messages
-        if (event.isIgnorable) return
-
-        scope.launch {
+    init {
+        addEventListener<MessageReceivedEvent> { event ->
             // split the args
             val args = event.message.contentStripped.trim().split(" ")
 
@@ -84,7 +97,12 @@ class Koncorda : ListenerAdapter() {
 fun Koncorda.commands(
     prefix: String = Koncorda.conf.getString("koncorda.command-prefix"),
     build: Command.Branch.() -> Unit
-) = addBaseCommand(Command.Branch(prefix = prefix).apply(build))
+) = baseCommands.add(Command.Branch(prefix = prefix).apply(build))
+
+/**
+ * Function to run when the bot enters the ready state after being started.
+ */
+fun Koncorda.onReady(action: suspend (ReadyEvent) -> Unit) = addEventListener(action)
 
 /**
  * The simplest way to start building a bot with Koncorda. Make sure to add .start() to the end!
