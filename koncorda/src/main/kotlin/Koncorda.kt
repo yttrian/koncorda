@@ -107,4 +107,4 @@ fun Koncorda.onReady(action: suspend (ReadyEvent) -> Unit) = addEventListener(ac
 /**
  * The simplest way to start building a bot with Koncorda. Make sure to add .start() to the end!
  */
-fun koncorda(init: Koncorda.() -> Unit) = Koncorda().apply(init)
+inline fun koncorda(init: Koncorda.() -> Unit) = Koncorda().apply(init)
