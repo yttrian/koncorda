@@ -1,14 +1,15 @@
 # Koncorda
 
-![Bintray](https://img.shields.io/bintray/v/yttrian/koncorda/koncorda?label=koncorda)
-![Bintray (latest)](https://img.shields.io/bintray/dt/yttrian/koncorda/koncorda)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yttrian/koncorda)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/yttrian)
 
 A small DSL for quickly creating a command bot with [JDA](https://github.com/DV8FromTheWorld/JDA).
 Inspired by the simplicity [Ktor](https://github.com/ktorio/ktor).
 
 # Installation
 
-Add the JCenter repository, the latest Koncorda release, JDA, and an SLF4J implementation to your `build.gradle.kts`.
+Add the Maven Central, Jitpack and dv8tion repositories, the latest Koncorda release, JDA, and an SLF4J implementation
+to your `build.gradle.kts`.
 
 While Koncorda is intended to be somewhat opinionated, you are free to chose your SLF4J implementation.
 Logback is recommended for the sole reason that it's what the Ktor project generator suggests.
@@ -18,15 +19,18 @@ without needing Koncorda to be updated as well. As well as being able to chose t
 
 ```kotlin
 repositories {
-    jcenter()
+    mavenCentral()
+    maven("https://m2.dv8tion.net/releases")
+    maven("https://jitpack.io")
 }
-
+```
+```kotlin
 dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("net.dv8tion:JDA:4.2.0_227") {
+    implementation("net.dv8tion:JDA:4.2.1_253") {
         exclude(module = "opus-java") // optional, for if you don't plan to use voice chat
     }
-    implementation("org.yttr:koncorda:0.2.3")
+    implementation("com.github.yttrian:koncorda:0.3.0")
 }
 ```
 
