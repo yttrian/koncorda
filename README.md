@@ -30,7 +30,7 @@ dependencies {
     implementation("net.dv8tion:JDA:4.2.1_253") {
         exclude(module = "opus-java") // optional, for if you don't plan to use voice chat
     }
-    implementation("com.github.yttrian:koncorda:0.3.0")
+    implementation("com.github.yttrian:koncorda:0.3.1")
 }
 ```
 
