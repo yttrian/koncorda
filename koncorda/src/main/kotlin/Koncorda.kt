@@ -24,6 +24,7 @@ class Koncorda {
     private val discordToken = conf.getString("koncorda.discord-token")
     internal val baseCommands = mutableListOf<Command.Branch>()
     internal val eventListeners = mutableListOf<EventListener>()
+    internal val configs = mutableListOf<(BuilderConfig) -> Unit>()
 
     private val job = SupervisorJob()
     internal val scope = CoroutineScope(Dispatchers.Default + job)
@@ -31,7 +32,7 @@ class Koncorda {
     /**
      * Explicitly listed gateways intents, defaults to JDA defaults
      */
-    var gatewayIntents = GatewayIntent.getIntents(GatewayIntent.DEFAULT).toList()
+    var gatewayIntents: List<GatewayIntent> = GatewayIntent.getIntents(GatewayIntent.DEFAULT).toList()
 
     /**
      * Complete the JDA builder and start the bot
@@ -41,9 +42,13 @@ class Koncorda {
         JDABuilder.createLight(discordToken)
     } else {
         JDABuilder.createDefault(discordToken)
-    }.apply {
-        eventListeners.forEach { addEventListeners(it) }
-        setEnabledIntents(gatewayIntents)
+    }.also { builder ->
+        eventListeners.forEach { builder.addEventListeners(it) }
+        configs.forEach { config ->
+            with (config) {
+                config(builder)
+            }
+        }
     }.build()
 
     internal inline fun <reified E : Event> addEventListener(crossinline action: suspend (E) -> Unit) {
@@ -103,6 +108,11 @@ fun Koncorda.commands(
  * Function to run when the bot enters the ready state after being started.
  */
 fun Koncorda.onReady(action: suspend (ReadyEvent) -> Unit) = addEventListener(action)
+
+/**
+ *
+ */
+fun Koncorda.configure(config: (BuilderConfig) -> Unit) = configs.add(config)
 
 /**
  * The simplest way to start building a bot with Koncorda. Make sure to add .start() to the end!
