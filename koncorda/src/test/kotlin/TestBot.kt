@@ -2,7 +2,6 @@ import command.HelpCommand
 import command.TestCommand
 import command.check.Useless
 import net.dv8tion.jda.api.MessageBuilder
-import net.dv8tion.jda.api.requests.GatewayIntent
 import org.yttr.koncorda.await
 import org.yttr.koncorda.command.check.Impossible
 import org.yttr.koncorda.command.check.and
@@ -10,11 +9,17 @@ import org.yttr.koncorda.command.check.not
 import org.yttr.koncorda.command.check.or
 import org.yttr.koncorda.commands
 import org.yttr.koncorda.koncorda
+import org.yttr.koncorda.modify
 import org.yttr.koncorda.onReady
 
 fun main() {
     koncorda {
-        gatewayIntents = listOf(GatewayIntent.GUILD_MESSAGES)
+        modify {
+            clearEnabledIntents()
+            clearEnabledCaches()
+            +GatewayIntent.GUILD_MESSAGES
+            +CacheFlag.EMOTE
+        }
 
         commands {
             leaf("help", HelpCommand)

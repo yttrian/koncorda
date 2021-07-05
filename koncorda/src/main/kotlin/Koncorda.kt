@@ -11,10 +11,11 @@ import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
-import net.dv8tion.jda.api.requests.GatewayIntent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.yttr.koncorda.command.Command
+import org.yttr.koncorda.configure.BuilderMemoryConfig
+import org.yttr.koncorda.configure.Modify
 
 /**
  * The Discord bot application, with useful DSLs for setting up different features.
@@ -24,15 +25,10 @@ class Koncorda {
     private val discordToken = conf.getString("koncorda.discord-token")
     internal val baseCommands = mutableListOf<Command.Branch>()
     internal val eventListeners = mutableListOf<EventListener>()
-    internal val configs = mutableListOf<(BuilderConfig) -> Unit>()
+    internal val configs = mutableListOf<BuilderMemoryConfig>()
 
     private val job = SupervisorJob()
     internal val scope = CoroutineScope(Dispatchers.Default + job)
-
-    /**
-     * Explicitly listed gateways intents, defaults to JDA defaults
-     */
-    var gatewayIntents: List<GatewayIntent> = GatewayIntent.getIntents(GatewayIntent.DEFAULT).toList()
 
     /**
      * Complete the JDA builder and start the bot
@@ -44,10 +40,8 @@ class Koncorda {
         JDABuilder.createDefault(discordToken)
     }.also { builder ->
         eventListeners.forEach { builder.addEventListeners(it) }
-        configs.forEach { config ->
-            with (config) {
-                config(builder)
-            }
+        configs.forEach {
+            it.apply { builder.configure() }
         }
     }.build()
 
@@ -112,7 +106,9 @@ fun Koncorda.onReady(action: suspend (ReadyEvent) -> Unit) = addEventListener(ac
 /**
  *
  */
-fun Koncorda.configure(config: (BuilderConfig) -> Unit) = configs.add(config)
+fun <T : Modify> Koncorda.modify(config: T.() -> Unit) = when (T) {
+    is BuilderMemoryConfig -> configs.add(T::c().apply(config))
+}
 
 /**
  * The simplest way to start building a bot with Koncorda. Make sure to add .start() to the end!
